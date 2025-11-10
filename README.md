@@ -1,2 +1,3 @@
 # skillfactoruy
 "For study"
+Python
