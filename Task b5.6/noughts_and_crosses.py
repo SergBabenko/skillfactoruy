@@ -1,23 +1,17 @@
 def greet():
     """Creating a greeting."""
-    print("-------------------")
-    print("Welcome to the game")
-    print(" Noughts & Crosses ")
-    print("-------------------")
-    print(" Input format: x y ")
-    print("  x - line number  ")
-    print(" y - Column number ")
-    print("-------------------")
+    print("-" * 19)
+    print("Welcome to the game\n Noughts & Crosses \n"+ "-" * 19)
+    print(" Input format: x y \n x - line number  \n y - column number")
+    print("-" * 19)
 
 def print_board():
     """Creating a visual field."""
-    print()
-    print("   | 0 | 1 | 2 |")
-    print(" ---------------")
+    print("\n   | 0 | 1 | 2 |")
+    print(" " + "-" * 15)
     for i, row in enumerate(field): # get index and element
-        row_str = f" {i} | {' | '.join(row)} | "
-        print(row_str)
-        print(" ---------------")
+        print(f" {i} | {' | '.join(row)} | ")
+        print(" " + "-" * 15)
     print()
 
 def player_move():
@@ -29,15 +23,14 @@ def player_move():
             print("Please enter 2 coordinate!")
             continue
 
-        x, y = cords
 
-        if not(x.isdigit()) or not(y.isdigit()): # checking that the entered numbers
+        if not all(c.isdigit() for c in cords): # checking that the entered numbers
             print("Input numbers!")
             continue
 
-        x, y = int(x), int(y)  # convert coordinates into a number
+        x, y = map(int, cords)  # convert coordinates into a number
 
-        if 0 > x or x > 2 or 0 > y or y > 2:  # check the range
+        if not (0 <= x <= 2 and 0 <= y <= 2):  # check the range
             print("Coordinate out of range!")
             continue
 
@@ -49,45 +42,37 @@ def player_move():
 
 def win_combo():
     """Creating a win combo."""
+
     win_cord = (((0, 0), (0, 1), (0, 2)), ((1, 0), (1, 1), (1, 2)), ((2, 0), (2, 1), (2, 2)),
                 ((0, 2), (1, 1), (2, 0)), ((0, 0), (1, 1), (2, 2)), ((0, 0), (1, 0), (2, 0)),
                 ((0, 1), (1, 1), (2, 1)), ((0, 2), (1, 2), (2, 2)))
+
     for cord in win_cord:
-        symbols = []
-        for c in cord:                   # match checking
-            symbols.append(field[c[0]][c[1]])
-        if symbols == ["X", "X", "X"]:
-            print("Win X!!!")
-            return True
-        if symbols == ["0", "0", "0"]:
-            print("Win 0!!!")
-            return True
-    return False
+       symbols = [field[r][c] for r, c in cord]                  # match checking
+       if symbols[0] != " " and all(s == symbols[0] for s in symbols):
+           return symbols[0]  # return winer simbol
+
+    return None
 
 
 greet()
 field = [[" "] * 3 for i in range(3)]
 count = 0
+
 while True:
     """Checking turn order"""
-    count += 1
     print_board()
-    if count % 2 == 1:
-        print("Move Crosses!")
-    else:
-        print("Move noughts!")
+    current_symbol = "X" if count % 2 == 0 else "0"
+    print(f"Move {current_symbol}!")
 
     x, y = player_move()
-
-    if count % 2 == 1:
-        field[x][y] = "X"
-    else:
-        field[x][y] = "0"
+    field[x][y] = current_symbol
+    count += 1
 
     if win_combo():
+        print(f"{print_board()}\n Win {win_combo()}!!!")
         break
 
     if count == 9:
-        print("Draw!")
+        print(f"{print_board()}\n 'Draw'!!!!")
         break
-
