@@ -1,3 +1,5 @@
-# skillfactoruy
+# skillfactory
+
 "For study"
 Python
+
