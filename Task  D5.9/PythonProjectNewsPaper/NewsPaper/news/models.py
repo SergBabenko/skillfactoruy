@@ -27,6 +27,9 @@ class Author(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
+    def __str__(self):
+        return self.name.title()
+
 class Post(models.Model):
     TYPE_CHOICES = (("News", "Новость"),("Articles", "Статья"))
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
@@ -36,6 +39,7 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     rating = models.IntegerField(default=0)
+
 
 
     def like(self):
@@ -52,9 +56,16 @@ class Post(models.Model):
         else:
             return self.text[:124] + "..."
 
+    def __str__(self):
+        return f'{self.title}: {self.preview()}'
+
 class PostCategory(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.category.name.title()
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)

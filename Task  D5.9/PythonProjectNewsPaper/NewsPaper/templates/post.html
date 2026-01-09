@@ -1,0 +1,16 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}
+
+{% block title %}
+Публикация № {{post.id}}
+{% endblock title %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h3>Date: {% now 'M d Y' %}</h3>
+    <h1>{{ post.title|censor }}</h1>
+    <hr>
+    <h3>{{ post.created_at|date:'d M Y' }}</h3>
+    <h3>{{ post.text|censor }}</h3>
+</div>
+{% endblock content %}
