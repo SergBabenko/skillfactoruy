@@ -10,7 +10,22 @@
     <h3>Date: {% now 'M d Y' %}</h3>
     <h1>{{ post.title|censor }}</h1>
     <hr>
-    <h3>{{ post.created_at|date:'d M Y' }}</h3>
-    <h3>{{ post.text|censor }}</h3>
+    <h2>{{ post.created_at|date:'d M Y' }}</h2>
+    <h2>{{ post.text|censor }}</h2>
+    <h3>
+        {% if post.post_type == "News" %}
+        <a href="{% url 'news_update' post.id %}">Изменить</a>
+        {% else %}
+        <a href="{% url 'articles_update' post.id %}">Изменить</a>
+        {% endif %}
+    </h3>
+    <tr></tr>
+    <h3>
+        {% if post.post_type == "News" %}
+        <a href="{% url 'news_delete' post.id %}">Удалить</a>
+        {% else %}
+        <a href="{% url 'articles_delete' post.id %}">Удалить</a>
+        {% endif %}
+    </h3>
 </div>
 {% endblock content %}

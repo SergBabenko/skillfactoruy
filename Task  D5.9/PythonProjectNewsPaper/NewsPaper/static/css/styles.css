@@ -10824,3 +10824,27 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.filter-form p {
+    margin: 5px 0;
+    width: 300px;
+    text-align: left;
+}
+
+.filter-form input:not([type="submit"]),
+.filter-form select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-form input[type="submit"] {
+    width: auto;
+    margin-top: 10px;
+}
+
