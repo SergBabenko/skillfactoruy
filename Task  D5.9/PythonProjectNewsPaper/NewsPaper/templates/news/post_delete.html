@@ -1,0 +1,18 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_tags %}
+
+{% block title %}
+Удаление "{{ post.id }}"
+{% endblock title %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h1>Подтвердите удаление {{add_or_change}}: {{ post.title }}</h1>
+    <h3>Date: {% current_time '%b %d %Y' %}</h3>
+    <form action="" method="post" class="filter-form">
+        {% csrf_token %}
+        <input type="submit" value="Подтвердить удаление" class="btn btn-primary btn-sm">
+    </form>
+</div>
+{% endblock content %}
+

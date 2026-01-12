@@ -1,3 +1,5 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.core.mail import send_mail
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .forms import PostForm
@@ -6,12 +8,14 @@ from datetime import datetime
 from django_filters.views import FilterView
 from .filters import PostFilter
 from .utils import add_or_change
+from sign.utils import request_object
+
 
 class PostList(ListView):
 
     model = Post
     ordering = '-created_at'
-    template_name = 'posts.html'
+    template_name = 'news/posts.html'
     context_object_name = 'posts'
     paginate_by = 10
 
@@ -19,7 +23,7 @@ class PostListSearch(FilterView):
 
     model = Post
     ordering = '-created_at'
-    template_name = 'search_list.html'
+    template_name = 'news/search_list.html'
     context_object_name = 'posts'
     paginate_by = 10
     filterset_class = PostFilter
@@ -50,36 +54,50 @@ class PostListSearch(FilterView):
 
 class PostDetail(DetailView):
     model = Post
-    template_name = 'post.html'
+    template_name = 'news/post.html'
     context_object_name = 'post'
 
     # def post(request, pk):
     #    post = Post.objects.get(pk=pk)
     #    return render(request, 'post.html', {'post': post})
 
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
-    template_name = 'add_or_change.html'
+    template_name = 'news/add_or_change.html'
+    permission_required = 'news.add_post'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return add_or_change(context, self.request.path)
 
-class PostUpdate(UpdateView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        group_subscribers = request_object('subscribers')
+        subscribers_user = group_subscribers.user_set.values_list('email', flat=True)
+        send_mail(
+            subject="Уведомление по подписке",
+            message="Появилась новая публикация",
+            from_email="Server@server.ru",
+            recipient_list=subscribers_user,
+        )
+
+class PostUpdate(PermissionRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'add_or_change.html'
+    template_name = 'news/add_or_change.html'
+    permission_required = 'news.change_post'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return add_or_change(context, self.request.path)
 
-class PostDelete(DeleteView):
+class PostDelete(PermissionRequiredMixin, DeleteView):
     model = Post
-    template_name = 'post_delete.html'
+    template_name = 'news/post_delete.html'
     context_object_name = 'post'
     success_url = reverse_lazy("posts")
+    permission_required = 'news.delete_post'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
