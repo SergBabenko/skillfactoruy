@@ -30,6 +30,7 @@
                        {% if perms.news.add_post %}
                        <li class="nav-item active"><a class="nav-link" href="{% url 'news_create' %}"> Создать Новость</a></li>
                        <li class="nav-item active"><a class="nav-link" href="{% url 'articles_create' %}"> Создать статью</a></li>
+                       <li class="nav-item active"><a class="nav-link" href="{% url 'category_list' %}"> Подписки</a></li>
                        {% endif %}
                        {% if user.is_authenticated %}
                        <li class="nav-item active"><a class="nav-link" href="{% url 'user_profile' %}">Профиль</a></li>
