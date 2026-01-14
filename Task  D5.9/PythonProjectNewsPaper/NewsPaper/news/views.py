@@ -73,7 +73,7 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         before_datetime = timezone.now() - timedelta(days=1)
         posts_count = Post.objects.filter(author=self.request.user.author, created_at__gte=before_datetime).count()
-        context['posts_limit'] = posts_count < 300
+        context['posts_limit'] = posts_count < 3
         return add_or_change(context, self.request.path)
 
     def form_valid(self, form):
