@@ -39,7 +39,7 @@ def post_restriction_notice(sender, instance, *args, **kwargs):
         return
     before_datetime = timezone.now() - timedelta(days=1)
     posts_count = Post.objects.filter(author=instance.author, created_at__gte=before_datetime).count()
-    if posts_count >= 300:
+    if posts_count >= 3:
         raise PermissionDenied('Лимит создания постов исчерпан, Ваш лимит 3 поста в сутки!')
 
 
