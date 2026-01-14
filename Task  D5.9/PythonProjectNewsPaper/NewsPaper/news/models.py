@@ -27,6 +27,8 @@ class Author(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    subscribers = models.ManyToManyField(User, related_name='categories')
+
 
     def __str__(self):
         return self.name
@@ -56,6 +58,7 @@ class Post(models.Model):
             return self.text
         else:
             return self.text[:124] + "..."
+
 
     def __str__(self):
         return f'{self.title}: {self.preview()}'

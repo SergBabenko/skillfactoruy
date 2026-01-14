@@ -1,14 +1,16 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .forms import PostForm
-from .models import Post
-from datetime import datetime
+from .models import Post, Category
+from datetime import datetime, timedelta
 from django_filters.views import FilterView
 from .filters import PostFilter
 from .utils import add_or_change
-from sign.utils import request_object
+
 
 
 class PostList(ListView):
@@ -69,20 +71,21 @@ class PostCreate(PermissionRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        before_datetime = timezone.now() - timedelta(days=1)
+        posts_count = Post.objects.filter(author=self.request.user.author, created_at__gte=before_datetime).count()
+        context['posts_limit'] = posts_count < 300
         return add_or_change(context, self.request.path)
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        group_subscribers = request_object('subscribers')
-        subscribers_user = group_subscribers.user_set.values_list('email', flat=True)
-        send_mail(
-            subject="Уведомление по подписке",
-            message="Появилась новая публикация",
-            from_email="Server@server.ru",
-            recipient_list=subscribers_user,
-        )
+        post = form.save(commit=False)
+        post.author = self.request.user.author
+        if 'articles' in self.request.path:
+            post.post_type = 'Articles'
+        post.save()
 
-class PostUpdate(PermissionRequiredMixin, UpdateView):
+        return super().form_valid(form)
+
+class PostUpdate(LoginRequiredMixin,PermissionRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/add_or_change.html'
@@ -102,3 +105,24 @@ class PostDelete(PermissionRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return add_or_change(context, self.request.path)
+
+class CategoryList(LoginRequiredMixin, ListView):
+    model = Category
+    context_object_name = 'categories'
+    template_name = 'news/category_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return add_or_change(context, self.request.path)
+
+@login_required
+def subscribe(request, pk):
+    category = Category.objects.get(pk=pk)
+    category.subscribers.add(request.user)
+    return redirect(request.META.get('HTTP_REFERER'))
+
+@login_required
+def unsubscribe(request, pk):
+    category = Category.objects.get(pk=pk)
+    category.subscribers.remove(request.user)
+    return redirect(request.META.get('HTTP_REFERER'))

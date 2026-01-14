@@ -1,7 +1,9 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 from allauth.account.forms import SignupForm
+from django.core.mail import send_mail
 
 
 class RegisterForm(UserCreationForm):
@@ -42,5 +44,17 @@ class MyCustomSignupForm(SignupForm):
         user = super().save(request)
         common_group, created = Group.objects.get_or_create(name='common')
         user.groups.add(common_group)
+        html_content = (
+            f'<p>Привет, {user.username}!</p>'
+            '<p>вы успешно зарегистрировались на<p/>'
+            f'<a href="{settings.SITE_URL}">Новостном портале</a>'
+        )
+        send_mail(
+            subject='Регистрация',
+            message='Вы успешно зарегистрировались',
+            html_message=html_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+        )
 
         return user
